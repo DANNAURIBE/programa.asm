@@ -3,7 +3,7 @@
 ; Course: Computer Architecture - 202016893 - UNAD
 ; Description: Asks the user for two numbers and an operation
 ;              (+, -, *, /) and displays the result.
-; Assembler: MASM (x86 16-bit, DOS)
+; Assembler: MASM (x86 16-bit, DOS)(
 ; ============================================================
 
 .MODEL SMALL
