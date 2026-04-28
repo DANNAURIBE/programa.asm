@@ -22,7 +22,7 @@
     label_unad    DB  "**   UNAD - National Open and Distance University **", 13, 10, "$"
 
     ; ---- Student data (EDIT THESE) ----
-    label_name    DB  "**   Student : Ana Maria Garcia Lopez             **", 13, 10, "$"
+    label_name    DB  "**   Student : Danna Valeria Uribe Santiago             **", 13, 10, "$"
     label_career  DB  "**   Career  : Systems Engineering                **", 13, 10, "$"
 
     ; ---- Footer ----

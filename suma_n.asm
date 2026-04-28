@@ -1,89 +1,108 @@
-; ============================================================
-; Program 4: Sum of First N Natural Numbers
-; Course: Computer Architecture - 202016893 - UNAD
-; Description: Reads N from the user (0-9) and computes the
-;              sum 1 + 2 + 3 + ... + N, displaying the result.
-; Assembler: MASM (x86 16-bit, DOS)
-; ============================================================
+.model small
+.stack 100h
 
-.MODEL SMALL
-.STACK 100H
+.data
+msg_titulo db 13,10,'=== SUMA DE LOS PRIMEROS N NUMEROS NATURALES ===',13,10,'$'
+msg db 'Ingrese N (0-9): $'
+res db 13,10,'Suma(1..N) = $'
 
-.DATA
-    msg_title   DB  "=== SUM OF FIRST N NATURAL NUMBERS ===", 13, 10, "$"
-    msg_prompt  DB  "Enter N (0-9): $"
-    msg_result  DB  13, 10, "Sum(1..N) = $"
-    msg_newline DB  13, 10, "$"
+resultado dw ?
 
-.CODE
-MAIN PROC
-    ; Initialize data segment
-    MOV  AX, @DATA
-    MOV  DS, AX
+.code
+main:
+mov ax,@data
+mov ds,ax
 
-    ; ---- Display title ----
-    MOV  AH, 09H
-    LEA  DX, msg_title
-    INT  21H
+; ==============================
+; MOSTRAR TITULO
+; ==============================
+mov ah,9
+lea dx,msg_titulo
+int 21h
 
-    ; ---- Read N from user ----
-    MOV  AH, 09H
-    LEA  DX, msg_prompt
-    INT  21H
+; ==============================
+; PEDIR N
+; ==============================
+mov ah,9
+lea dx,msg
+int 21h
 
-    MOV  AH, 01H        ; Read character
-    INT  21H
-    SUB  AL, '0'        ; Convert ASCII to number
-    MOV  CL, AL         ; CL = N (loop limit)
-    MOV  CH, 0          ; Clear high byte
+mov ah,1
+int 21h
+sub al,30h
+mov cl,al
 
-    ; ---- Accumulate sum in AX ----
-    MOV  AX, 0          ; AX = accumulator (sum)
-    MOV  BL, 1          ; BL = current addend (starts at 1)
+; ==============================
+; CALCULAR SUMA
+; ==============================
+mov ax,0
+mov bl,1
 
-    CMP  CL, 0
-    JE   SHOW_RESULT    ; If N=0, sum=0
+sumar:
+add ax,bx
+inc bx
+loop sumar
 
-SUM_LOOP:
-    ADD  AL, BL         ; sum = sum + current_number
-    INC  BL             ; Increment current number
-    DEC  CL             ; Decrement loop counter
-    JNZ  SUM_LOOP       ; Repeat while CL != 0
+mov resultado,ax   ; guardar resultado seguro
 
-SHOW_RESULT:
-    ; ---- Display "Sum = " label ----
-    MOV  AH, 09H
-    LEA  DX, msg_result
-    INT  21H
+; ==============================
+; MOSTRAR RESULTADO
+; ==============================
+mov ah,9
+lea dx,res
+int 21h
 
-    ; ---- Convert AX to printable digits (max sum for N=9 is 45) ----
-    MOV  AH, 0
-    MOV  BL, 10
-    DIV  BL             ; AL = tens, AH = units
+mov ax,resultado
+call imprimirNumero
 
-    CMP  AL, 0
-    JE   SKIP_TENS      ; Skip leading zero
-    ADD  AL, '0'
-    MOV  DL, AL
-    MOV  AH, 02H
-    INT  21H
+; ==============================
+; FINALIZAR
+; ==============================
+mov ah,4ch
+int 21h
 
-SKIP_TENS:
-    MOV  AL, AH
-    ADD  AL, '0'
-    MOV  DL, AL
-    MOV  AH, 02H
-    INT  21H
+; ==============================
+; PROCEDIMIENTO IMPRIMIR NUMERO
+; ==============================
+imprimirNumero proc
+push ax
+push bx
+push cx
+push dx
 
-    ; ---- New line ----
-    MOV  AH, 09H
-    LEA  DX, msg_newline
-    INT  21H
+mov cx,0
+mov bx,10
 
-    ; Terminate program
-    MOV  AH, 4CH
-    MOV  AL, 0
-    INT  21H
+cmp ax,0
+jne convertir
 
-MAIN ENDP
-END MAIN
+mov dl,'0'
+mov ah,2
+int 21h
+jmp fin_imp
+
+convertir:
+ciclo:
+xor dx,dx
+div bx
+push dx
+inc cx
+cmp ax,0
+jne ciclo
+
+imprimir:
+pop dx
+add dl,30h
+mov ah,2
+int 21h
+loop imprimir
+
+fin_imp:
+pop dx
+pop cx
+pop bx
+pop ax
+ret
+imprimirNumero endp
+
+end main

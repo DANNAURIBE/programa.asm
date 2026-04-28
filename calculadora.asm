@@ -1,155 +1,212 @@
-; ============================================================
-; Program 1: Integer Calculator (Two Numbers)
-; Course: Computer Architecture - 202016893 - UNAD
-; Description: Asks the user for two numbers and an operation
-;              (+, -, *, /) and displays the result.
-; Assembler: MASM (x86 16-bit, DOS)(
-; ============================================================
+.model small
+.stack 100h
 
-.MODEL SMALL
-.STACK 100H
+.data
+msg1 db 'Ingrese numero 1: $'
+msg2 db 13,10,'Ingrese numero 2: $'
+msgOp db 13,10,'Operacion (+,-,*,/): $'
+res db 13,10,'Resultado: $'
+error db 13,10,'Error (division por cero)$'
 
-.DATA
-    ; ---- Messages ----
-    msg_title   DB  "=== INTEGER CALCULATOR ===", 13, 10, "$"
-    msg_num1    DB  "Enter first number  (0-9): $"
-    msg_num2    DB  "Enter second number (0-9): $"
-    msg_op      DB  "Enter operation (+, -, *, /): $"
-    msg_result  DB  13, 10, "Result: $"
-    msg_newline DB  13, 10, "$"
-    msg_error   DB  13, 10, "Division by zero!", 13, 10, "$"
+num1 dw ?
+num2 dw ?
+resultado dw ?
+op db ?
 
-.CODE
-MAIN PROC
-    ; Initialize data segment
-    MOV  AX, @DATA
-    MOV  DS, AX
+buffer db 6,?,6 dup('$')
 
-    ; ---- Display title ----
-    MOV  AH, 09H
-    LEA  DX, msg_title
-    INT  21H
+.code
+main:
+mov ax,@data
+mov ds,ax
 
-    ; ---- Read first number ----
-    MOV  AH, 09H
-    LEA  DX, msg_num1
-    INT  21H
+; ==============================
+; SOLICITAR PRIMER NUMERO
+; ==============================
+mov ah,9
+lea dx,msg1
+int 21h
 
-    MOV  AH, 01H        ; Read character from keyboard
-    INT  21H
-    SUB  AL, '0'        ; Convert ASCII -> numeric (0-9)
-    MOV  BL, AL         ; BL = first number
+lea dx,buffer
+call leerNumero
+mov num1,ax
 
-    ; ---- New line ----
-    MOV  AH, 09H
-    LEA  DX, msg_newline
-    INT  21H
+; ==============================
+; SOLICITAR SEGUNDO NUMERO
+; ==============================
+mov ah,9
+lea dx,msg2
+int 21h
 
-    ; ---- Read second number ----
-    MOV  AH, 09H
-    LEA  DX, msg_num2
-    INT  21H
+lea dx,buffer
+call leerNumero
+mov num2,ax
 
-    MOV  AH, 01H
-    INT  21H
-    SUB  AL, '0'        ; Convert ASCII -> numeric
-    MOV  CL, AL         ; CL = second number
+; ==============================
+; SOLICITAR OPERACION
+; ==============================
+mov ah,9
+lea dx,msgOp
+int 21h
 
-    ; ---- New line ----
-    MOV  AH, 09H
-    LEA  DX, msg_newline
-    INT  21H
+mov ah,1
+int 21h
+mov op,al   ; Guardamos el operador
 
-    ; ---- Read operator ----
-    MOV  AH, 09H
-    LEA  DX, msg_op
-    INT  21H
+; ==========================================================
+; NOTA SOBRE ENTRADA DE OPERADORES (IMPORTANTE)
+;
+; En el emulador js-dos el teclado utiliza distribución inglesa (US).
+; Por esta razón, algunos símbolos cambian respecto al teclado español.
+;
+; Para ingresar correctamente la suma (+), se debe presionar:
+;        SHIFT + =
+;
+; Si no se hace esto, el sistema puede interpretar el símbolo '='
+; en lugar de '+'. Por este motivo, el programa acepta ambos.
+;
+; TABLA DE EQUIVALENCIAS:
+;
+; TECLA PRESIONADA        CARÁCTER RECIBIDO
+; -----------------------------------------
+; SHIFT + =               +
+; =                       =
+; -                       -
+; *                       *
+; /                       /
+;
+; ==========================================================
 
-    MOV  AH, 01H
-    INT  21H
-    MOV  DL, AL         ; DL = operator character
+mov al,op
 
-    ; ---- New line ----
-    MOV  AH, 09H
-    LEA  DX, msg_newline
-    INT  21H
+cmp al,'+'
+je suma
 
-    ; ---- Determine operation ----
-    CMP  DL, '+'
-    JE   DO_ADD
-    CMP  DL, '-'
-    JE   DO_SUB
-    CMP  DL, '*'
-    JE   DO_MUL
-    CMP  DL, '/'
-    JE   DO_DIV
-    JMP  EXIT_PROG      ; Unknown operator
+cmp al,'='   ; soporte para teclado en js-dos
+je suma
 
-DO_ADD:
-    MOV  AL, BL
-    ADD  AL, CL         ; AL = num1 + num2
-    JMP  SHOW_RESULT
+cmp al,'-'
+je resta
 
-DO_SUB:
-    MOV  AL, BL
-    SUB  AL, CL         ; AL = num1 - num2
-    JMP  SHOW_RESULT
+cmp al,'*'
+je multi
 
-DO_MUL:
-    MOV  AL, BL
-    MUL  CL             ; AX = num1 * num2  (result in AX)
-    JMP  SHOW_RESULT
+cmp al,'/'
+je divi
 
-DO_DIV:
-    CMP  CL, 0          ; Check for division by zero
-    JE   DIV_ERROR
-    MOV  AL, BL
-    MOV  AH, 0
-    DIV  CL             ; AL = quotient, AH = remainder
-    JMP  SHOW_RESULT
+jmp fin
 
-DIV_ERROR:
-    MOV  AH, 09H
-    LEA  DX, msg_error
-    INT  21H
-    JMP  EXIT_PROG
+; ==============================
+; OPERACIONES
+; ==============================
 
-SHOW_RESULT:
-    ; ---- Display "Result: " label ----
-    MOV  AH, 09H
-    LEA  DX, msg_result
-    INT  21H
+suma:
+mov ax,num1
+add ax,num2
+jmp guardar
 
-    ; ---- Convert result in AL to printable digits ----
-    ; Handle numbers 0-99 (two-digit at most for 9*9=81)
-    MOV  AH, 0
-    MOV  BX, 10
-    DIV  BL             ; AL = tens digit, AH = units digit
+resta:
+mov ax,num1
+sub ax,num2
+jmp guardar
 
-    CMP  AL, 0
-    JE   SKIP_TENS      ; Skip leading zero
-    ADD  AL, '0'
-    MOV  DL, AL
-    MOV  AH, 02H
-    INT  21H
+multi:
+mov ax,num1
+mul num2
+jmp guardar
 
-SKIP_TENS:
-    MOV  AL, AH
-    ADD  AL, '0'
-    MOV  DL, AL
-    MOV  AH, 02H
-    INT  21H
+divi:
+mov ax,num1
+cmp num2,0
+je error_div
+xor dx,dx
+div num2
+jmp guardar
 
-    ; ---- New line ----
-    MOV  AH, 09H
-    LEA  DX, msg_newline
-    INT  21H
+error_div:
+mov ah,9
+lea dx,error
+int 21h
+jmp fin
 
-EXIT_PROG:
-    ; Terminate program
-    MOV  AH, 4CH
-    MOV  AL, 0
-    INT  21H
+; ==============================
+; MOSTRAR RESULTADO
+; ==============================
+guardar:
+mov resultado,ax
 
-MAIN ENDP
-END MAIN
+mov ah,9
+lea dx,res
+int 21h
+
+mov ax,resultado
+call imprimirNumero
+
+fin:
+mov ah,4ch
+int 21h
+
+; ==============================
+; LEER NUMERO
+; ==============================
+leerNumero proc
+mov ah,0Ah
+int 21h
+
+mov si,dx
+mov cl,[si+1]
+mov ch,0
+add si,2
+
+xor ax,ax
+
+convertir:
+mov bl,[si]
+sub bl,30h
+mov bh,0
+
+mov dx,10
+mul dx
+add ax,bx
+
+inc si
+loop convertir
+
+ret
+leerNumero endp
+
+; ==============================
+; IMPRIMIR NUMERO
+; ==============================
+imprimirNumero proc
+mov cx,0
+mov bx,10
+
+cmp ax,0
+jne convertir2
+
+mov dl,'0'
+mov ah,2
+int 21h
+ret
+
+convertir2:
+convertir_loop:
+xor dx,dx
+div bx
+push dx
+inc cx
+cmp ax,0
+jne convertir_loop
+
+imprimir_loop:
+pop dx
+add dl,30h
+mov ah,2
+int 21h
+loop imprimir_loop
+
+ret
+imprimirNumero endp
+
+end main
