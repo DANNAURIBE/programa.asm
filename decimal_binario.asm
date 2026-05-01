@@ -18,31 +18,31 @@ MAIN PROC
     MOV  AX, @DATA
     MOV  DS, AX
 
-    ; Mostrar titulo
+    ; Display title
     MOV  AH, 09H
     LEA  DX, msg_title
     INT  21H
 
-    ; Pedir digito
+    ; Request digit
     MOV  AH, 09H
     LEA  DX, msg_input
     INT  21H
 
-    ; Leer caracter
+    ; Read character
     MOV  AH, 01H
     INT  21H
-    SUB  AL, '0'        ; Convertir ASCII a numero
-    MOV  BL, AL         ; BL = numero (0-9)
+    SUB  AL, '0'        ; Convert ASCII to number
+    MOV  BL, AL         ; BL = number (0-9)
 
-    ; Mostrar flecha
+    ; Display arrow
     MOV  AH, 09H
     LEA  DX, msg_arrow
     INT  21H
 
-    ; Mostrar 4 bits (bit 3, bit 2, bit 1, bit 0)
+    ; Display 4 bits (bit 3, bit 2, bit 1, bit 0)
     ; Bit 3
     MOV  AL, BL
-    AND  AL, 08H        ; Mascara 1000
+    AND  AL, 08H        ; Mask 1000
     CMP  AL, 0
     JE   BIT3_0
     MOV  DL, '1'
@@ -55,7 +55,7 @@ PRINT_BIT3:
 
     ; Bit 2
     MOV  AL, BL
-    AND  AL, 04H        ; Mascara 0100
+    AND  AL, 04H        ; Mask 0100
     CMP  AL, 0
     JE   BIT2_0
     MOV  DL, '1'
@@ -68,7 +68,7 @@ PRINT_BIT2:
 
     ; Bit 1
     MOV  AL, BL
-    AND  AL, 02H        ; Mascara 0010
+    AND  AL, 02H        ; Mask 0010
     CMP  AL, 0
     JE   BIT1_0
     MOV  DL, '1'
@@ -81,7 +81,7 @@ PRINT_BIT1:
 
     ; Bit 0
     MOV  AL, BL
-    AND  AL, 01H        ; Mascara 0001
+    AND  AL, 01H        ; Mask 0001
     CMP  AL, 0
     JE   BIT0_0
     MOV  DL, '1'
@@ -92,7 +92,7 @@ PRINT_BIT0:
     MOV  AH, 02H
     INT  21H
 
-    ; Nueva linea
+    ; New line
     MOV  AH, 09H
     LEA  DX, msg_newline
     INT  21H

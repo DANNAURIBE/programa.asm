@@ -2,11 +2,11 @@
 .stack 100h
 
 .data
-msg1 db 'Ingrese numero 1: $'
-msg2 db 13,10,'Ingrese numero 2: $'
-msgOp db 13,10,'Operacion (+,-,*,/): $'
-res db 13,10,'Resultado: $'
-error db 13,10,'Error (division por cero)$'
+msg1 db 'Enter number 1: $'
+msg2 db 13,10,'Enter number 2: $'
+msgOp db 13,10,'Operation (+,-,*,/): $'
+res db 13,10,'Result: $'
+error db 13,10,'Error (division by zero)$'
 
 num1 dw ?
 num2 dw ?
@@ -21,7 +21,7 @@ mov ax,@data
 mov ds,ax
 
 ; ==============================
-; SOLICITAR PRIMER NUMERO
+; REQUEST FIRST NUMBER
 ; ==============================
 mov ah,9
 lea dx,msg1
@@ -32,7 +32,7 @@ call leerNumero
 mov num1,ax
 
 ; ==============================
-; SOLICITAR SEGUNDO NUMERO
+; REQUEST SECOND NUMBER
 ; ==============================
 mov ah,9
 lea dx,msg2
@@ -43,7 +43,7 @@ call leerNumero
 mov num2,ax
 
 ; ==============================
-; SOLICITAR OPERACION
+; REQUEST OPERATION
 ; ==============================
 mov ah,9
 lea dx,msgOp
@@ -51,23 +51,23 @@ int 21h
 
 mov ah,1
 int 21h
-mov op,al   ; Guardamos el operador
+mov op,al   ; Save the operator
 
 ; ==========================================================
-; NOTA SOBRE ENTRADA DE OPERADORES (IMPORTANTE)
+; NOTE ON OPERATOR INPUT (IMPORTANT)
 ;
-; En el emulador js-dos el teclado utiliza distribución inglesa (US).
-; Por esta razón, algunos símbolos cambian respecto al teclado español.
+; In the js-dos emulator, the keyboard uses English (US) layout.
+; For this reason, some symbols differ from the Spanish keyboard.
 ;
-; Para ingresar correctamente la suma (+), se debe presionar:
+; To correctly enter the plus sign (+), you must press:
 ;        SHIFT + =
 ;
-; Si no se hace esto, el sistema puede interpretar el símbolo '='
-; en lugar de '+'. Por este motivo, el programa acepta ambos.
+; If this is not done, the system may interpret '='
+; instead of '+'. For this reason, the program accepts both.
 ;
-; TABLA DE EQUIVALENCIAS:
+; KEY EQUIVALENCE TABLE:
 ;
-; TECLA PRESIONADA        CARÁCTER RECIBIDO
+; KEY PRESSED             CHARACTER RECEIVED
 ; -----------------------------------------
 ; SHIFT + =               +
 ; =                       =
@@ -82,7 +82,7 @@ mov al,op
 cmp al,'+'
 je suma
 
-cmp al,'='   ; soporte para teclado en js-dos
+cmp al,'='   ; support for js-dos keyboard
 je suma
 
 cmp al,'-'
@@ -97,7 +97,7 @@ je divi
 jmp fin
 
 ; ==============================
-; OPERACIONES
+; OPERATIONS
 ; ==============================
 
 suma:
@@ -130,7 +130,7 @@ int 21h
 jmp fin
 
 ; ==============================
-; MOSTRAR RESULTADO
+; DISPLAY RESULT
 ; ==============================
 guardar:
 mov resultado,ax
@@ -147,7 +147,7 @@ mov ah,4ch
 int 21h
 
 ; ==============================
-; LEER NUMERO
+; READ NUMBER
 ; ==============================
 leerNumero proc
 mov ah,0Ah
@@ -176,7 +176,7 @@ ret
 leerNumero endp
 
 ; ==============================
-; IMPRIMIR NUMERO
+; PRINT NUMBER
 ; ==============================
 imprimirNumero proc
 mov cx,0

@@ -2,9 +2,9 @@
 .stack 100h
 
 .data
-msg_titulo db 13,10,'=== SUMA DE LOS PRIMEROS N NUMEROS NATURALES ===',13,10,'$'
-msg db 'Ingrese N (0-9): $'
-res db 13,10,'Suma(1..N) = $'
+msg_titulo db 13,10,'=== SUM OF THE FIRST N NATURAL NUMBERS ===',13,10,'$'
+msg db 'Enter N (0-9): $'
+res db 13,10,'Sum(1..N) = $'
 
 resultado dw ?
 
@@ -14,14 +14,14 @@ mov ax,@data
 mov ds,ax
 
 ; ==============================
-; MOSTRAR TITULO
+; DISPLAY TITLE
 ; ==============================
 mov ah,9
 lea dx,msg_titulo
 int 21h
 
 ; ==============================
-; PEDIR N
+; REQUEST N
 ; ==============================
 mov ah,9
 lea dx,msg
@@ -33,7 +33,7 @@ sub al,30h
 mov cl,al
 
 ; ==============================
-; CALCULAR SUMA
+; CALCULATE SUM
 ; ==============================
 mov ax,0
 mov bl,1
@@ -43,10 +43,10 @@ add ax,bx
 inc bx
 loop sumar
 
-mov resultado,ax   ; guardar resultado seguro
+mov resultado,ax   ; save result safely
 
 ; ==============================
-; MOSTRAR RESULTADO
+; DISPLAY RESULT
 ; ==============================
 mov ah,9
 lea dx,res
@@ -56,13 +56,13 @@ mov ax,resultado
 call imprimirNumero
 
 ; ==============================
-; FINALIZAR
+; END PROGRAM
 ; ==============================
 mov ah,4ch
 int 21h
 
 ; ==============================
-; PROCEDIMIENTO IMPRIMIR NUMERO
+; PRINT NUMBER PROCEDURE
 ; ==============================
 imprimirNumero proc
 push ax
